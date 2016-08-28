@@ -1,0 +1,109 @@
+---
+title: "Creating Benchmark Tests for Linear Algebra Routines in R"
+author: "Mick Cooney"
+date: "13 July 2016"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    fig_caption: yes
+    theme: cerulean
+    css: styles.css
+  pdf_document: default
+---
+
+<!--
+(Title:) Creating Benchmark Tests  for Linear Algebra Routines in R
+
+Author: Mick Cooney
+
+Date: 2016
+
+Abstract:
+
+Keywords: benchmark linear-algebra library
+
+-->
+
+```{r knit_opts, include = FALSE}
+rm(list = ls())
+
+knitr::opts_chunk$set(tidy       = FALSE
+                     ,cache      = FALSE
+                     ,fig.height =  8
+                     ,fig.width  = 11
+                     )
+
+
+options(width            = 90)
+options(stringsAsFactors = FALSE)
+
+# Available from http://cas.uqam.ca/
+library(CASdatasets)
+
+library(MASS)
+
+
+set.seed(42)
+
+
+```
+
+# Introduction
+
+The primary purpose of this workbook is to create the benchmark
+routines that we will use to time the various BLAS libraries we
+install on our machines.
+
+The main reason for doing this is to investigate the effect of more
+optimised BLAS libraries from a practical point of view.
+
+# Benchmark Matrix Inversion
+
+```{r invert_covariance_matrix, echo=TRUE}
+calc_covar <- function(X1, X2, l=1) {
+    Sigma <- outer(X1, X2, function(a, b) exp(-0.5 * (abs(a - b) / l)^2))
+
+    return(Sigma)
+}
+
+x_mesh <- seq(-5, 5, length.out = 5000)
+
+Sigma <- calc_covar(x_mesh, x_mesh, 1)
+
+print(system.time(Sigma_inv <- solve(Sigma)))
+```
+
+# Benchmark Linear Model Fit
+
+```{r fit_glm, echo=TRUE}
+system.time(glm(ClaimNb ~ Area + as.factor(VehPower) + VehAge + VehBrand +
+                          VehGas + Region
+               ,offset = Exposure
+               ,data   = freMTPL2freq
+               ,family = poisson
+               )
+)
+```
+
+
+
+# Benchmark Bootstrapped Linear Model Fit
+
+```{r bootstrap_fit_linear_model, echo=TRUE}
+
+```
+
+
+# Benchmark Multivariate Normal Sample
+
+```{r sample_multivariate, echo=TRUE}
+system.time(mvsample <- mvrnorm(1000, rep(0, nrow(Sigma)), Sigma))
+```
+
+
+# Benchmark Eigenvalue Calculation
+
+```{r calculate_eigenvalues, echo=TRUE}
+system.time(eigen(Sigma))y
+```
